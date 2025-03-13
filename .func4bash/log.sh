@@ -61,10 +61,11 @@ function log.setline() {
     # Get the size of the terminal
     local columns=$(tput cols)
     local total=""
-    for ((i=1; i<=$columns; i++)); do
-        total+="-"
+    for ((i=1; i<=$(( columns / 2 )); i++)); do
+        half+="-"
     done
-    echo -e "$1$total"
+    [[ -z $1 ]] && local info="/$1\\"
+    echo -e "$half$info$half"
 }
 
 # Aliases for logging
