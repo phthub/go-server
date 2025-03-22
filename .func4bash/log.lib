@@ -1,12 +1,6 @@
 #!/bin/bash
+# log.lib - A Bash library for logging better.
 
-# logging.lib - A Bash library for logging with different levels
-
-# Function to check if tput is installed (for colored output)
-#if ! command -v tput &> /dev/null; then
-#    echo "tput is not installed. Please install ncurses to use colored output."
-#    return 1
-#fi
 # Color definitions using ANSI escape codes
 RESET_COLOR="\033[0m"
 COLOR_GENERIC="\033[35m"   # Magenta for date
@@ -24,8 +18,10 @@ if command -v tput &> /dev/null; then
     COLOR_ERROR=$(tput setaf 1)$(tput blink)    # Red with blink
     COLOR_DONE=$(tput setaf 2)     # Green
 fi
-# Timestamp format
-TIMESTAMP_FORMAT="%H:%M:%S"   # Shorter time format (HH:MM:SS)
+
+
+# Try multiple methods to get terminal width
+columns=$(tput cols 2>/dev/null || echo "$COLUMNS" || resize 2>/dev/null | awk '{print $3}' || echo 0)
 
 # Function to log with a specific level
 function log() {
@@ -59,40 +55,37 @@ function log.sub() {
 
 function log.setline() {
     # Get the size of the terminal
-    local columns=$(tput cols)
-    local total=""
-    for ((i=1; i<=$(( columns / 2 )); i++)); do
+    local half=""
+    local info=""
+    ! [[ -z $1 ]] && info="/${COLOR_INFO}$1${RESET_COLOR}\\"
+    for ((i=1; i<=$(( columns - ${#info} )); i++)); do
         half+="-"
     done
-    [[ -z $1 ]] && local info="/$1\\"
-    echo -e "$half$info$half"
+
+    echo -e "$info$half"
 }
 
-# Aliases for logging
-alias logi='log.info'
-alias logw='log.warn'
-alias loge='log.error'
-alias logd='log.done'
-alias logsub='log.sub'
+function log.endline() {
+    # Get the size of the terminal
+    local half=""
+    local info=""
+    ! [[ -z $1 ]] && info="\\${COLOR_DONE}$1${RESET_COLOR}/"
+    for ((i=1; i<=$(( columns - ${#info} )); i++)); do
+        half+="-"
+    done
 
-# Example usage (you can comment these out or remove them)
+    echo -e "$info$half"
+}
+
+
+# Example usage
 # log.info "This is an info message."
 # log.warn "This is a warning message."
 # log.error "This is an error message."
 # log.done "This task is complete."
+# log.sub "This is a subtask."
 
-
-logging.test() {
-    log.info "This is an informational message."
-    log.warn "This is a warning message."
-    log.error "This is an error message."
-    log.done "This task is complete."
-    log.sub "This is a sub log."
-    log.setline
-
-    # Or using aliases
-    logi "This is an informational message using alias."
-    logw "This is a warning message using alias."
-    loge "This is an error message using alias."
-    logd "This task is complete using alias."
-}
+# --------------------------------------
+# log.setline "Starting task"
+# log.sub "This is a subtask."
+# log.endline "Task completed"

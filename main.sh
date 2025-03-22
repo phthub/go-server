@@ -1,4 +1,4 @@
-source .func4bash/log.sh
+source .func4bash/log.lib
 
 log.info "Verifying Go installation..."
 if ! command -v go &>/dev/null; then
@@ -11,5 +11,6 @@ if ! command -v go &>/dev/null; then
     log.info "CLS in 3 second..."
     sleep 3 && clear
 fi
-
-go run server.go
+log.setline "Starting Server"
+go run cmd/main.go
+log.endline "Server Stopped"

@@ -1,4 +1,0 @@
-os=debian
-giturl=https://github.com/phthub/go-server
-exec=main.sh
-vpath=/opt/server
